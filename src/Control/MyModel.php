@@ -10,9 +10,9 @@ use SilverStripe\ORM\FieldType\DBField;
 class MyModel extends Controller
 {
     protected $hierarchy = [];
-    
+
     private static $allowed_actions = [
-        'index' => 'ADMIN'  
+        'index' => 'ADMIN'
     ];
 
     public function index()
