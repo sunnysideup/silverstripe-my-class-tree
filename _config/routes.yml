@@ -1,0 +1,6 @@
+---
+Name: sunnysideup-my-class-tree
+---
+SilverStripe\Control\Director:
+  rules:
+    admin-dev/mymodel//$Action/$ID: Sunnysideup\MyClassTre\Controller\MyModel
