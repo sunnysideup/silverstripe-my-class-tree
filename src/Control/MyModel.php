@@ -36,6 +36,9 @@ class MyModel extends Controller
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
       </head>
     <body>
+        <p>
+            <a href="#" onclick="javascript: $(\'#list\').jstree(\'open_all\'); return false;">expand all</a>
+        </p>
         <div id="list"></div>
     <script>
     $(document).ready(
