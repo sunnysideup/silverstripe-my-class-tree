@@ -9,8 +9,6 @@ use SilverStripe\ORM\FieldType\DBField;
 
 class MyModel extends Controller
 {
-    protected $hierarchy = [];
-
     private static $allowed_actions = [
         'index' => 'ADMIN'
     ];
@@ -29,6 +27,8 @@ class MyModel extends Controller
     <head>
         <style>
             .jstree-closed > a {background-color: pink!important;}
+            .hideme {display:none;}
+            a:hover > .hideme {display: inline;}
         </style>
         <title>json tree example</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
@@ -70,9 +70,11 @@ class MyModel extends Controller
             if ($parent === $root) {
                 # Remove item from tree (we don't need to traverse this again)
                 unset($tree[$child]);
+                $short = ClassInfo::shortName($child);
+                $longMinusShort = rtrim(str_replace($short, '', $child), '\\');
                 # Append the child into result array and parse its children
                 $return[] = [
-                    'text' => $child,
+                    'text' => '<strong>'.$short.'</strong> <span class="hideme"> - '.$longMinusShort.'<span>',
                     'children' => $this->parseTree($tree, $child),
                 ];
             }
