@@ -10,19 +10,21 @@ use SilverStripe\ORM\FieldType\DBField;
 class MyModel extends Controller
 {
     private static $allowed_actions = [
-        'index' => 'ADMIN'
+        'index' => 'ADMIN',
+        'raw' => 'ADMIN',
     ];
+
+    public function raw()
+    {
+        $html = $this->array2ul($this->hierarchyOfClasses(DataObject::class));
+        echo DBField::create_field('HTMLText', $html)->raw();
+        return [];
+    }
 
     public function index()
     {
-        $list = ClassInfo::subclassesFor(DataObject::class);
-        foreach ($list as $class) {
-            $ancestors = ClassInfo::ancestry($class);
-            $ancestor = array_pop($ancestors);
-            $ancestor = array_pop($ancestors);
-            $childParentArray[$class] = $ancestor;
-        }
-        $childParentArray[DataObject::class] = null;
+        $list = $this->hierarchyOfClasses(DataObject::class);
+
         $html = '<html lang="en">
     <head>
         <style>
@@ -43,7 +45,7 @@ class MyModel extends Controller
     <script>
     $(document).ready(
         function() {
-            var json = ' . json_encode($this->parseTree($childParentArray)) . ';
+            var json = ' . json_encode($list) . ';
             $("#list").jstree(
                 {
                     "core" : {
@@ -58,7 +60,21 @@ class MyModel extends Controller
     </body>
 </html>';
         echo $html;
-        //return DBField::create_field('HTMLText', $html)->raw();
+        // return DBField::create_field('HTMLText', $html)->raw();
+    }
+
+    protected function hierarchyOfClasses($className = '')
+    {
+        $list = ClassInfo::subclassesFor($className);
+        foreach ($list as $class) {
+            $ancestors = ClassInfo::ancestry($class);
+            $ancestor = array_pop($ancestors);
+            $ancestor = array_pop($ancestors);
+            $childParentArray[$class] = $ancestor;
+        }
+        $childParentArray[DataObject::class] = null;
+
+        return $this->parseTree($childParentArray);
     }
 
     protected function parseTree($tree, $root = null)
@@ -80,5 +96,28 @@ class MyModel extends Controller
             }
         }
         return empty($return) ? [] : $return;
+    }
+
+    /**
+     * Render an array|object as HTML list (UL > LI)
+     *
+     * @param mixed $data List items
+     *
+     * @return string
+     */
+    public static function array2ul($data) :string {
+        $return = '';
+        foreach ($data as $index => $item) {
+            if (!is_string($item)) {
+                $return .= '<li>' . ($index) . '<ul>' . self::array2ul($item) . "</ul></li>";
+            } else {
+                $return .= '<li>';
+                if (is_object($data)) {
+                    $return .= ($index) . ' - ';
+                }
+                $return .= ($item) .'</li>';
+            }
+        }
+        return $return;
     }
 }
